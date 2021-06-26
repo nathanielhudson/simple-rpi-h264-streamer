@@ -1,0 +1,34 @@
+{
+  "name": "simple-rpi-player",
+  "version": "1.0.0",
+  "main": "app.js",
+  "files": [
+    "lib/",
+    "AUTHORS",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "run": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/matijagaspar/ws-avc-player"
+  },
+  "keywords": [
+    "h264",
+    "nal",
+    "live",
+    "broadcast",
+    "streaming",
+    "video",
+    "websocket",
+    "raspberry"
+  ],
+  "description": "Simple RPi h264 webcam streamer and player that works out of the box as of December 2020.",
+  "dependencies": {
+    "express": "^4.17.1",
+    "stream-split": "^1.1.0",
+    "ws": "^7.4.1"
+  }
+}

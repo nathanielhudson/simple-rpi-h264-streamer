@@ -1,0 +1,133 @@
+<html>
+
+<head>
+  <title>Webcam Stream</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <style>
+    body {
+      background-color: black;
+      color: #fff;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body>canvas {
+      width: 100vw;
+      height: 56.25vw;
+      /* height:width ratio = 9/16 = .5625  */
+      max-height: 100vh;
+      max-width: 177.78vh;
+      /* 16/9 = 1.778 */
+      margin: auto;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      /* vertical center */
+      left: 0;
+      right: 0;
+      /* horizontal center */
+    }
+
+    #message_wrapper {
+      position: fixed;
+      z-index: 10;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #messages {
+      text-align: center;
+    }
+
+    #metadata_wrapper {
+      position: fixed;
+      z-index: 5;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #metadata {
+      font-size: 10px;
+      margin: 3px 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!--<button type="button" onclick="wsavc.send('custom_event_from_client',{ hello:'world' })">Send event to server</button>-->
+
+  <div id="message_wrapper">
+    <p id="messages">Loading...</p>
+  </div>
+
+  <div id="metadata_wrapper">
+    <p id="metadata">No connection yet</p>
+  </div>
+
+  <script type="text/javascript" src="WSAvcPlayer.js">;</script>
+
+  <script type="text/javascript">
+    var canvas = document.getElementById('cam')
+    // Create h264 player
+    var wsavc = new WSAvcPlayer.default({ useWorker: true });
+    document.body.appendChild(wsavc.AvcPlayer.canvas)
+    //expose instance for button callbacks
+    window.wsavc = wsavc;
+
+    function connect() {
+      document.getElementById("messages").innerHTML = "Connecting...";
+      var uri = "ws://" + document.location.hostname + ":3333";
+      wsavc.connect(uri);
+    }
+
+
+    wsavc.on('disconnected', () => {
+      console.log('WS disconnected');
+      document.getElementById("message_wrapper").style.display = "";
+      document.getElementById("messages").innerHTML = "Stream Disconnected.";
+    });
+    wsavc.on('connected', () => {
+      console.log('WS connected')
+      document.getElementById("message_wrapper").style.display = "none";
+    });
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden && wsavc.running) {
+        wsavc.disconnect();
+      } else if (!document.hidden && !wsavc.running) {
+        connect();
+      }
+    });
+
+    wsavc.on('custom_event_from_server', event => console.log('got event from server', event));
+
+    window.setInterval(function () {
+      document.getElementById("metadata").innerHTML = `Broadway: ${wsavc.running ? "Running" : "Halted"} | Packet Count: ${wsavc.pktnum}`;
+    }, 250)
+
+    connect();
+  </script>
+
+</body>
+
+</html>
